@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн Меню</title>
+    <!-- <link rel="stylesheet" href="styles/styles.css"> Попробуем позже подключить через файл, а пока здесь же будет css -->
+
+    <style>
+        /* Общие стили */
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            /* background-color: #f9f9f9; */
+            color: #333;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Навигация */
+        .nav-header {
+            background-color: #333;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .navig {
+            width: max-content;
+        }
+
+        .navig ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .navig li {
+            margin: 0 10px;
+        }
+
+        .navig a {
+            color: white;
+            text-transform: uppercase;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .cart-button {
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .cart-button:hover {
+            background-color: #0056a3;
+        }
+
+        /* Основной контент */
+        .main {
+            margin-top: 50px;
+
+        }
+
+        .block_item {
+            background: white;
+            padding: 0 30px;
+        }
+
+        /* Блюда */
+        .dish {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 15px;
+            min-height: 150px;
+            padding: 20px;
+
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
+        }
+        .dish-img-block {
+            width: 40%;
+
+
+        }
+
+        .dish-info-block {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+            height: 100%;
+        }
+        .dish-info-block p {
+            margin-top: 10px;
+        }
+
+        .dish img {
+            width: 100%;
+            height: 100%;
+            margin-right: 15px;
+            border-radius: 10px;
+            background-color: #ddd;
+        }
+
+        .price {
+            margin-top: auto;
+            align-self: end;
+        }
+
+        .dish-controls {
+
+            display: flex;
+            align-items: center;
+            align-self: end;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .add-to-cart {
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add-to-cart:hover {
+            background-color: #0056a3;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantity-controls.hidden {
+            display: none;
+        }
+
+        /* Корзина */
+        .cart {
+            position: fixed;
+            top: 80px;
+            right: 0;
+            width: 300px;
+            background-color: white;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px 0 0 10px;
+            z-index: 1000;
+        }
+
+        .cart.hidden {
+            display: none;
+        }
+
+        .cart h2 {
+            margin: 0;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .cart-items {
+            margin-bottom: 20px;
+        }
+
+        .close-cart {
+            background-color: #ff5f5f;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .close-cart:hover {
+            background-color: #e44e4e;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 900;
+        }
+
+        #overlay.hidden {
+            display: none;
+        }
+
+
+
+    </style>
+
+</head>
+<body>
+
+    <!-- Overlay для клика вне корзины -->
+    <div id="overlay" class="hidden" onclick="closeCart()"></div>
+
+    <!-- Header с кнопкой корзины -->
+    <header class="nav-header">
+        <nav class="navig">
+            <ul>
+                <li><a href="{% url 'menu' %}">Апити</a></li>
+                {% for type in types %}
+                    <li><a href="#{{ type.id }}">{{ type.name }}</a></li>
+                {% endfor %}
+                <li><a href="#"></a></li>
+            </ul>
+        </nav>
+
+    </header>
+
+    <div class="main">
+
+        <!-- {% for type in types %}
+            <section id="{{ type.id }}">
+                <h2>{{ type.name }}</h2>
+
+                {% for dish in type.dishes.all  %}
+                    <div class="dish">
+                        <img src="#" alt="img not found" class="dish-image">
+                        <h3>{{ dish.name }}</h3>
+                        <p>{{ dish.description }}.</p>
+                        <p>{{ dish.price1 }}</p>
+                        {% if dish.price2 != 'NULL' %}
+                            <p>{{ dish.price2 }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor%}
+
+            </section>
+        {% endfor%} -->
+
+        {% for type in types %}
+        <div class="block_item" id="{{ type.id }}">
+            <h2>{{ type.name }}</h2>
+
+            {% for dish in type.dishes.all  %}
+            <div class="dish">
+
+                <div class="dish-img-block">
+                    <img src="#" alt="img not found" class="dish-image">
+                </div>
+
+                <div class="dish-info-block">
+                    <h3>{{ dish.name }}</h3>
+                    <p>{{ dish.description }}</p>
+                    <div class="price">
+                        <p>{{ dish.price1 }}</p>
+                        {% if dish.price2 != 'NULL' %}
+                            <p>{{ dish.price2 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="dish-controls">
+
+                        <button class="add-to-cart" onclick="addToCart('{{ dish.name }}')">Добавить в корзину</button>
+                        <div class="quantity-controls hidden" data-item="{{ dish.name }}">
+                            <button onclick="decreaseQuantity('{{ dish.name }}')">-</button>
+                            <span id="quantity-{{ dish.name }}">1</span>
+                            <button onclick="increaseQuantity('{{ dish.name }}')">+</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <!-- Корзина -->
+        <div class="cart hidden" id="cart">
+            <h2>Корзина</h2>
+            <div id="cart-items"></div>
+            <button class="close-cart" onclick="toggleCart()">Закрыть</button>
+        </div>
+
+
+        <button class="cart-button" onclick="toggleCart()">Мой список (<span id="cart-count">0</span>)</button>
+
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        const cart = {};
+        const cartCountElement = document.getElementById("cart-count");
+        const cartItemsElement = document.getElementById("cart-items");
+
+        function addToCart(item) {
+            if (!cart[item]) {
+                cart[item] = 1;
+                document.querySelector(`.quantity-controls[data-item="${item}"]`).classList.remove("hidden");
+                document.querySelector(`button[onclick="addToCart('${item}')"]`).classList.add("hidden");
+                document.querySelector(`.addToCart[data-item="${item}"]`).classList.add("hidden");
+            }
+            updateCart();
+        }
+
+        function increaseQuantity(item) {
+            cart[item]++;
+            updateCart();
+        }
+
+        function decreaseQuantity(item) {
+            if (cart[item] > 1) {
+                cart[item]--;
+            } else {
+                delete cart[item];
+                document.querySelector(`.quantity-controls[data-item="${item}"]`).classList.add("hidden");
+                document.querySelector(`button[onclick="addToCart('${item}')"]`).classList.remove("hidden");
+            }
+            updateCart();
+        }
+
+        function updateCart() {
+            let totalCount = 0;
+            cartItemsElement.innerHTML = "";
+            for (const [item, quantity] of Object.entries(cart)) {
+                totalCount += quantity;
+                cartItemsElement.innerHTML += `<p>${item} - ${quantity}</p>`;
+                document.getElementById(`quantity-${item}`).textContent = quantity;
+            }
+            cartCountElement.textContent = totalCount;
+        }
+
+        function toggleCart() {
+            document.getElementById("cart").classList.toggle("hidden");
+        }
+
+        function closeCart() {
+            document.getElementById("cart").classList.add("hidden");
+            document.getElementById("overlay").classList.add("hidden");
+        }
+
+        function toggleCart() {
+            const cart = document.getElementById("cart");
+            const overlay = document.getElementById("overlay");
+            cart.classList.toggle("hidden");
+            overlay.classList.toggle("hidden");
+        }
+    </script>
+</body>
+</html>

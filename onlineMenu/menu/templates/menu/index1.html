@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн Меню</title>
+
+    <style>
+        /* Общие стили */
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            /* background-color: #f9f9f9; */
+            color: #333;
+            scroll-behavior: smooth; /* Анимация плавного скроллинга */
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Навигация */
+        .nav-header {
+            background-color: #333;
+            width: 100%;
+            height: 30px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 800;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+
+        }
+
+        .navig {
+            width: max-content;
+        }
+
+        .navig ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .navig li a {
+            margin: 0 10px;
+            font-size: 20px;
+            color: white;
+        } .navig li button {
+            font-size: 20px;
+        }
+
+        /* Базовые стили для кнопок */
+        .nav-button {
+          background-color: transparent; /* Прозрачный фон */
+          color: white; /* Белый текст */
+          font-size: 16px; /* Размер текста */
+          border: none; /* Убираем рамку */
+          padding: 10px 20px; /* Внутренние отступы для кликабельности */
+          cursor: pointer; /* Курсор "рука" */
+          position: relative; /* Для эффектов */
+          transition: all 0.3s ease-in-out; /* Плавный переход для анимаций */
+        }
+
+
+
+        /* Адаптация для мобильных устройств */
+        @media (max-width: 768px) {
+          .nav-button {
+            font-size: 14px; /* Немного меньший текст */
+            padding: 8px 16px; /* Уменьшенные отступы */
+          }
+        }
+
+        .cart-button {
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .cart-button:hover {
+            background-color: #0056a3;
+        }
+
+        /* Основной контент */
+        .main {
+            max-width: 500px;
+            margin: 50px auto 0;
+
+        }
+
+        .block_item {
+            background: white;
+            padding: 10px;
+        }
+
+        /* Блюда */
+        .dish {
+
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 15px;
+            min-height: 150px;
+            min-width: 300px;
+            padding: 20px;
+
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
+        }
+        .dish-img-block {
+            width: 45%;
+            height: 160px;
+
+        }
+
+        .dish-info-block {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+            height: 100%;
+        }
+        .dish-info-block p {
+            margin-top: 10px;
+        }
+
+        .dish img {
+            width: 100%;
+            height: 100%;
+            margin-right: 15px;
+            border-radius: 10px;
+            background-color: #ddd;
+            object-fit: cover; /* Обрезает изображение, сохраняя пропорции */
+            object-position: center; /* Центрует изображение */
+            overflow: hidden;  /* Обрезка лишнего содержимого */
+        }
+
+        .description-text {
+            font-size: 14px;
+        }
+
+        .price {
+            margin-top: auto;
+            /* align-self: end;*/
+            margin: 15px 0 0 0;
+        } .price-in {
+            display: inline-block;
+            background-color: #333;
+            padding: 5px 10px;
+            border-radius: 10px;
+        } .price-in p {
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 2px 0;
+        }
+
+        .dish-controls {
+
+            display: flex;
+            align-items: center;
+            align-self: end;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .add-to-cart {
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add-to-cart:hover {
+            background-color: #0056a3;
+        }
+
+        .change-cnt-btn {
+            width: 30px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantity-controls.hidden {
+            display: none;
+        }
+
+        /* Корзина */
+        .cart {
+            position: fixed;
+            /* top: 80px;
+            right: 0; */
+
+            top: 40px;                    /* Отступ сверху */
+            left: 40px;                   /* Отступ слева */
+            right: 40px;                  /* Отступ справа */
+            bottom: 40px;
+
+            /* width: 300px; */
+            background-color: white;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .cart-content {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+
+        .cart.hidden {
+            display: none;
+        }
+
+        .cart h2 {
+            margin: 0;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .cart-items {
+            margin-bottom: 20px;
+        }
+
+        .close-cart {
+            background-color: #ff5f5f;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .close-cart:hover {
+            background-color: #e44e4e;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 900;
+            display: block;
+        }
+
+        #overlay.hidden {
+            display: none;
+        }
+
+
+        /* For fixed button */
+        .fixed-button {
+            position: fixed;        /* Фиксируем кнопку относительно окна браузера */
+            bottom: 20px;           /* Расстояние от нижнего края экрана */
+            right: 20px;            /* Расстояние от правого края экрана */
+            /* padding: 10px 20px;     /* Отступы внутри кнопки */
+            /* font-size: 16px;        /* Размер шрифта */
+            /* background-color: #4CAF50; /* Цвет фона кнопки */
+            /* color: white;           /* Цвет текста */
+            /* border: none;           /* Убираем рамку */
+            /* border-radius: 5px;     /* Скругление углов */
+            cursor: pointer;       /* Курсор в виде указателя */
+            z-index: 1000;          /* Чтобы кнопка была поверх других элементов */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay для клика вне корзины -->
+    <div id="overlay" class="overlay hidden"></div>
+
+    <!-- Header с кнопкой корзины -->
+    <header class="nav-header">
+        <nav class="navig">
+            <ul>
+                <!-- <li><a href="{% url 'menu' %}">Апити</a></li> -->
+
+                {% for type in types %}
+                    <li><button class="nav-button" onclick="scrollToElement('{{ type.name }}')">{{ type.name }}</button></li>
+                {% endfor %}
+                <li><a href="#"></a></li>
+            </ul>
+        </nav>
+
+    </header>
+
+    <!-- Основной контент -->
+    <div class="main">
+
+        {% for type in types %}
+        <div class="block_item" id="{{ type.name }}">
+
+            <h2>{{ type.name }}</h2>
+
+            {% for dish in type.dishes.all  %}
+
+                <div class="dish">
+
+                    <div class="dish-img-block">
+                        <img src="{{ dish.image.url }}" alt="пицца0" class="dish-image">
+                    </div>
+
+                    <div class="dish-info-block">
+                        <h3>{{ dish.name }}</h3>
+                        {% if dish.description != 'NULL' %}
+                            <p class="description-text">{{ dish.description }}</p>
+                        {% endif %}
+
+                        <div class="price">
+                            <div class="price-in">
+                                <p>{{ dish.price1 }}</p>
+                                {% if dish.price2 != 'NULL' %}
+                                    <p>{{ dish.price2 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="dish-controls">
+                            <!--
+                            <button onclick="addToCart('{{ dish.id }}')">Добавить в корзину</button>
+                            <div class="quantity-controls hidden" data-item="{{ dish.id }}">
+                                <button onclick="decreaseQuantity('{{ dish.id }}')">-</button>
+                                <span id="quantity-{{ dish.id }}">0</span>
+                                <button onclick="increaseQuantity('{{ dish.id }}')">+</button>
+                            </div>
+                            -->
+                        </div>
+                    </div>
+                </div>
+
+            {% endfor %}
+
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Анимация скролла
+
+        function scrollToElement(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    </script>
+    <!-- Корзина -->
+    <!-- <div class="cart hidden" id="cart">
+        <div class="cart-content">
+            <h2>Корзина</h2>
+            <div id="cart-items"></div>
+            <div id="total-price" class="total-price">Итоговая Сумма: 0</div>
+            <button class="close-cart" onclick="toggleCart()">Закрыть</button>
+        </div>
+    </div>
+
+
+    <button class="cart-button fixed-button" onclick="toggleCart()">Мой список (<span id="cart-count">0</span>)</button>
+    -->
+    <!-- <script>
+        const cart = {};
+        const cartCountElement = document.getElementById("cart-count");
+        const cartItemsElement = document.getElementById("cart-items");
+
+        // Получаем данные о блюдах из Django-шаблона
+        const items = JSON.parse('{{ dishes_json|escapejs }}');
+
+        function addToCart(itemId) {
+            // Если товар еще не в корзине, добавляем его с количеством 1
+            if (!cart[itemId]) {
+                cart[itemId] = 1;
+                // Показываем управление количеством
+                document.querySelector(`.quantity-controls[data-item="${itemId}"]`).classList.remove("hidden");
+                document.querySelector(`button[onclick="addToCart('${itemId}')"]`).classList.add("hidden");
+            }
+            updateCart();
+        }
+
+        function increaseQuantity(itemId) {
+            cart[itemId]++;
+            updateCart();
+        }
+
+        function decreaseQuantity(itemId) {
+            if (cart[itemId] > 1) {
+                cart[itemId]--;
+            } else {
+                delete cart[itemId];
+                // Скрыть управление количеством и вернуть кнопку добавления товара
+                document.querySelector(`.quantity-controls[data-item="${itemId}"]`).classList.add("hidden");
+                document.querySelector(`button[onclick="addToCart('${itemId}')"]`).classList.remove("hidden");
+            }
+            updateCart();
+        }
+
+        function updateCart() {
+            let totalCount = 0;
+            let totalPrice = 0;
+            cartItemsElement.innerHTML = ""; // Очищаем корзину
+
+            // Обновляем корзину
+            for (const [itemId, quantity] of Object.entries(cart)) {
+                totalCount += quantity;
+
+                // Получаем данные о товаре
+                const item = items.find(i => i.pk == itemId); // Находим товар по ID
+
+                // Вычисляем цену для данного товара
+                const itemTotalPrice = item.fields.price1 * quantity;
+                totalPrice += itemTotalPrice;
+
+                // Формируем HTML для товара
+                const itemHtml = `
+                    <div class="dish">
+                        <div class="dish-img-block">
+                            <img src="${item.fields.image}" alt="${item.fields.name}" class="dish-image">
+                        </div>
+                        <div class="dish-info-block">
+                            <h3>${item.fields.name}</h3>
+                            <p>${item.fields.description}</p>
+                            <div class="price"><p>${itemTotalPrice}р</p></div>
+                            <div class="dish-controls">
+                                <div class="quantity-controls" data-item="${itemId}">
+                                    <button onclick="decreaseQuantity('${itemId}')">-</button>
+                                    <span id="quantity-${itemId}">${quantity}</span>
+                                    <button onclick="increaseQuantity('${itemId}')">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                cartItemsElement.innerHTML += itemHtml;
+            }
+
+            // Обновляем количество товаров в корзине
+            if (cartCountElement) {
+                cartCountElement.textContent = totalCount;
+            }
+
+            // Выводим итоговую сумму
+            const totalPriceElement = document.getElementById('total-price');
+            if (totalPriceElement) {
+                totalPriceElement.textContent = `Итоговая сумма: ${totalPrice}р`;
+            }
+        }
+
+        function toggleCart() {
+            const cart = document.getElementById("cart");
+            const overlay = document.getElementById("overlay");
+
+            cart.classList.toggle("hidden");
+            overlay.classList.toggle("hidden");
+
+            if (!cart.classList.contains("hidden")) {
+                document.body.style.overflow = "hidden";
+            } else {
+                document.body.style.overflow = "";
+            }
+        }
+
+        function closeCart() {
+            const cart = document.getElementById("cart");
+            const overlay = document.getElementById("overlay");
+
+            cart.classList.add("hidden");
+            overlay.classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+
+        // Обработчик клика по фону для закрытия корзины
+        document.getElementById("overlay").addEventListener("click", function() {
+            closeCart();
+        });
+    </script> -->
+</body>
+</html>
